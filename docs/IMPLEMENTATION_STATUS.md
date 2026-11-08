@@ -89,3 +89,22 @@ The project owner should authorize and launch the Colab training session with a 
 - Public Streamlit access previously returned an HTTP **303 redirect to Streamlit authentication**. Changing this account-level sharing setting requires a signed-in app owner. Code changes do not establish anonymous access.
 
 **Next exact checkpoint:** Merge the new candidate only after full CI, then verify live anonymous Streamlit access and real upload prediction. Resume the most recent Drive checkpoint in authorized Colab only if its ongoing run did not finish; never repeat completed epochs or overwrite it just to improve the public demo.
+
+## Last verified integration milestone — PR #3, 2026-11-08 13:44 UTC
+
+- **Source baseline:** `main` was at `241388f303a2b677fbc6d0abb87ddd4b8bed6882` at the start of this review. No existing completed training or dataset downloads were restarted.
+- **New observed checkpoint:** Original Drive `HAR_Results/cnn_lstm_3/best.keras`, last modified 2026-11-08 13:17:34 UTC, SHA-256 `56dd0103de1273fd31f22c1c0146ef9abf3dbef5998608cca1c3ff30b668fd1a`, 2,774,833 bytes, and 108 saved Adam optimizer updates = 9 complete 12-batch epochs for the existing 92-video train split at batch size 8. The linked notebook has nine completed epoch logs and a partial tenth; its `history.csv` remains empty.
+- **Recovered validation evidence:** Epoch 8 validation accuracy 0.35, epoch 9 validation accuracy 0.25, epoch 9 validation loss 1.8029. These are console-reported validation values on 20 clips, **not** held-out test results.
+- **Local smoke:** Keras 3.13.2 with Torch backend loaded the new checkpoint (225,735 parameters, input 20×64×64×3, output 7) and produced finite normalized softmax predictions on a synthetic tensor.
+- **Integration:** [PR #3](https://github.com/Ahmdullah16/Raj_Rishav/pull/3) merged into `main` at **`8f5e31648a00c61c95af2f05985cdc1206f892aa`**. The newer checkpoint was committed separately as `artifacts/best_epoch9.keras`; original `artifacts/best.keras` is unchanged. `src/har/checkpoint.py` pins both SHA-256 hashes.
+- **Streamlit:** `Predict Activity` is now the landing page; version-specific metadata and training curves load for the selected checkpoint, and ZIP-wrapped clips avoid a broken raw browser video player. The legacy checkpoint remains a tested fallback. No new dataset or GPU training occurred here.
+- **CI proof:** On the exact PR head `476965f4bb8f284de6c4f9593856b4bcec3fda3c`, source tests and full inference/Streamlit smoke passed. TensorFlow 2.18.1 restored the new Keras optimizer with **108 iterations** and successfully ran synthetic-video inference; local Streamlit pages and HTTP health passed.
+- **Public-app blocker remains:** The latest full CI probe again observed HTTP **303** redirect to `share.streamlit.io/-/auth/app` on `rajrishav-har.streamlit.app/_stcore/health`. Anonymous public access and actual browser video upload are **not verified**; signed-in Streamlit owner must update Settings → Sharing.
+- **Drive after rollout:** The original Drive checkpoint was still last modified 13:17:34 UTC, and the results folder contained no new complete evaluation artifacts. The app's experimental snapshot is intentionally not described as final.
+
+### Exact continuation point
+
+1. Verify GitHub Actions success on merged `main` (PR #3 integration).
+2. From the owner's Streamlit Community Cloud workspace, make `rajrishav-har` public, then test `https://rajrishav-har.streamlit.app/` anonymously with a real, permitted short video.
+3. If the authenticated Colab training has stopped, run `notebooks/HAR_Resume_Colab.ipynb` using the existing Drive checkpoint (nine completed epochs automatically detected); do **not** force epoch 3 or redownload Kaggle videos.
+4. Only after final training/model selection, evaluate held-out test set once and publish genuine accuracy, macro-F1, confusion matrix and research interpretation. No test scores have been fabricated.
