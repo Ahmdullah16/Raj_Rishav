@@ -1,17 +1,30 @@
-# Optional trained model and metric artifacts
+# Recovered model assets (2026-11-08)
 
-**This directory intentionally has no invented checkpoint or result.**
+This folder **contains real saved model artifacts** recovered from the user's
+Google Drive after an interrupted Colab run:
 
-After training the notebook on real data, place these files here or in `outputs/`:
+- `best.keras`: original CNN–LSTM 3 checkpoint, **2,774,833 bytes**.
+- `classes.json`: exact alphabetical order of the seven trained labels.
+- `run_metadata.json`: checkpoint SHA-256, architecture and provenance.
+- `history.csv`: **only three rounded epoch values reconstructed from the Colab console**; it is not the original CSVLogger output.
 
-- `best.keras` — trained Keras model (must match the seven-class dataset).
-- `classes.json` — JSON array of labels in the **exact order used for training**.
-- `history.csv` — Keras CSVLogger history (epoch, accuracy, val_accuracy, loss, val_loss).
-- `run_metadata.json` — training provenance.
-- `test_metrics.json` — final held-out test evaluation.
-- `confusion_matrix.csv` — labeled confusion matrix.
-- `model_comparison.csv` — optional `model,test_accuracy,...` table from comparable runs.
+A local Keras model-load and real-video inference smoke succeeded, and the
+GitHub full-dependency CI now checks TensorFlow/Keras checkpoint loading,
+synthetic video decoding, and Streamlit startup. This proves the pipeline can
+execute; **it does not establish held-out accuracy**.
 
-Avoid committing large or private `.keras` files. On the deployed Prediction page,
-upload a trained checkpoint and its matching `classes.json` as an alternative.
-No inference occurs without both. The public app does not download raw 2 GB videos.
+**Never overwrite the original checkpoint with an incomplete resumed run.**
+Use `notebooks/HAR_Resume_Colab.ipynb` or `python -m har.resume` to continue
+from epoch 3 into a separate Google Drive results folder.
+
+After selecting and completing the final trained model, publish only authentic:
+
+- `history.csv` — new uninterrupted/resume-run training history.
+- `run_metadata.json` and `training_state.json` — training provenance and progress.
+- `test_metrics.json` — single final held-out evaluation.
+- `confusion_matrix.csv` — measured seven-class confusion matrix.
+- `model_comparison.csv` — only after comparable runs.
+
+Raw dataset footage must stay in Google Drive. Any replacement of the deployed
+checkpoint must preserve a backup, matching `classes.json`, and tested
+deployment artifact provenance.
