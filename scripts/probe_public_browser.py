@@ -124,10 +124,21 @@ def browser_probe() -> dict:
                 action.click(timeout=60000)
                 alert = ui_frame.locator('[data-testid="stAlert"]').filter(has_text="Predicted activity:")
                 alert.wait_for(state="visible", timeout=180000)
-                has_csv = ui_frame.get_by_text("Download prediction CSV").count() > 0
                 result.update(
                     classification=classify_observation(page.url, prediction_visible=True),
                     prediction_visible=True,
+                )
+                # Streamlit renders the success alert before the Plotly chart,
+                # sampled frames, and download button are finished. Wait for
+                # the *completed* results screen instead of sampling too early.
+                download = ui_frame.get_by_text("Download prediction CSV", exact=True)
+                try:
+                    download.wait_for(state="visible", timeout=90000)
+                    has_csv = True
+                except Exception as exc:
+                    has_csv = False
+                    result["csv_wait_error"] = type(exc).__name__
+                result.update(
                     csv_download_control_visible=has_csv,
                     verified=bool(has_csv),
                 )
