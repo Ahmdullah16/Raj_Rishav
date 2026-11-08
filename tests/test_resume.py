@@ -50,7 +50,7 @@ def test_cache_budget_and_invalid_frames(tmp_path):
 
 
 def test_resume_protects_original_model_and_class_order(tmp_path):
-    source = tmp_path / "original.keras"
+    source = tmp_path / "best.keras"
     source.write_bytes(b"pretend checkpoint")
     class_map = tmp_path / "classes.json"
     class_map.write_text(json.dumps(sorted(LABELS)))
