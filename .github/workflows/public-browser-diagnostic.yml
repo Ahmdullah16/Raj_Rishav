@@ -1,0 +1,41 @@
+name: HAR anonymous public browser diagnostic
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/probe_public_browser.py"
+      - "tests/test_public_browser_probe.py"
+      - ".github/workflows/public-browser-diagnostic.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/probe_public_browser.py"
+      - "tests/test_public_browser_probe.py"
+      - ".github/workflows/public-browser-diagnostic.yml"
+
+jobs:
+  anonymous-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install browser smoke dependencies
+        run: |
+          python -m pip install "playwright>=1.48,<2" "opencv-python-headless>=4.8,<4.12" "numpy>=1.26,<2"
+          python -m playwright install chromium
+      - name: Test anonymous real browser visit and synthetic video upload
+        run: python scripts/probe_public_browser.py
+      - name: Archive bounded diagnostic report and screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: har-anonymous-browser-diagnostic
+          path: |
+            public_browser_diagnostic.json
+            public_browser_snapshot.png
+          if-no-files-found: warn
+          retention-days: 7
