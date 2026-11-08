@@ -24,3 +24,26 @@
 
 ## Access constraints / next action
 The project owner should authorize and launch the Colab training session with a suitable GPU and can then rerun the exact notebook's training/evaluation cells. **Do not claim completed training or public Streamlit validation until those steps actually succeed.**
+
+## Continuation milestone — November 8, 2026 (PR #2)
+
+- Resumed from merged source baseline `cd74eb379739f8cafb6956ba0ce0122f7bd0891e`; no dataset or original checkpoint replaced.
+- Keras 3.13.2 inspection of the existing checkpoint confirmed `compile_config` and saved Adam optimizer state with **36 iterations**. This allows stateful continuation of weights and optimizer under a compatible runtime, but it cannot reproduce lost random seeds/data-shuffle state exactly.
+- Implemented `scripts/smoke_inference.py`: **full TensorFlow CPU** loads the real checkpoint, decodes a generated short MP4, samples frames through `har.video.sample_video`, and predicts seven finite probabilities. This is **pipeline compatibility evidence**, not test accuracy.
+- Implemented `scripts/smoke_streamlit.py` via Streamlit AppTest (Overview and Predict Activity navigation), plus local server HTTP health. This full-dependency workflow has passed for prior incremental PR #2 commits; the final head must also pass before merge.
+- Implemented `src/har/cache.py` for a bounded local cache of normalized frames, with source fingerprint checks and no raw dataset download.
+- Implemented `src/har/resume.py`, a new training continuation runner. It checks the exact class mapping and split signature, loads the saved optimizer if compatible, requires a **new output directory**, retains per-epoch progress and Keras backup, and blocks repeat held-out evaluation.
+- Created `notebooks/HAR_Resume_Colab.ipynb` that mounts the **existing** Drive dataset and resumes `cnn_lstm_3` after epoch 3; it does not call Kaggle and writes into `HAR_Results/cnn_lstm_3_resumed_v1`.
+- Added pure Python regression tests for cache integrity, source-checkpoint protection and progress writes. Test fixture corrected after one failed run, then source CI passed.
+- Added read-only HTTP health probe for `https://rajrishav-har.streamlit.app/`. This is not a browser/video-upload test.
+- Maintained all prior notes about interrupted original training, validation accuracy 15%, and absent held-out test metrics.
+
+### Remaining work and execution boundary
+
+1. Merge PR #2 **only after both source tests and full-dependency smoke pass**.
+2. Check the live Community Cloud app revision and upload a real MP4 from a browser. A GitHub Actions local deployment is not a substitute for this.
+3. To complete training, run the new Colab notebook in an authorized Colab GPU runtime with access to the existing `MyDrive/RAJ Rishav` folder. This cannot be done by source-code CI and has not been done here.
+4. Preserve new training evidence in Drive; select the best model by validation and run held-out evaluation once. Replace public `best.keras` only after final verification and preserve the original model.
+5. Compare other model variants only when computational budget permits, without inventing metrics.
+
+**Current model accuracy is not validated. Do not label the final scientific project complete until training, evaluation and public upload inference are evidenced.**
