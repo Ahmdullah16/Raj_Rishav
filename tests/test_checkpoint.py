@@ -59,7 +59,7 @@ def test_reject_wrong_labels_for_verified_weights(tmp_path, monkeypatch):
 
 
 def test_versioned_checkpoint_verification_without_overwriting_original(tmp_path, monkeypatch):
-    older = b"original-test-checkpoint"
+    older = b"outdated artifact"
     newer = b"new-epoch9-test-artifact"
     assert len(older) != len(newer)
     new_path = tmp_path / checkpoint.NINE_EPOCH_FILENAME
