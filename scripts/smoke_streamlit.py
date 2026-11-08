@@ -55,8 +55,8 @@ def assert_prediction(app: AppTest, description: str) -> None:
     app.run(timeout=120)
     assert_no_exception(app, description)
     if app.error:
-        raise AssertionError(f"{description}: {[e.message for e in app.error]}")
-    if not any("Predicted activity:" in item.message
+        raise AssertionError(f"{description}: {[e.value for e in app.error]}")
+    if not any("Predicted activity:" in item.value
                for item in app.success):
         raise AssertionError(f"{description}: no model-generated prediction rendered")
     print(f"{description}: uploaded video decoded and predicted successfully.")
