@@ -26,12 +26,14 @@ def main() -> None:
     import tensorflow as tf
 
     from har.app_support import load_classes
-    from har.checkpoint import verify_checkpoint
+    from har.checkpoint import verify_published_checkpoint
     from har.video import sample_video, validate_video
 
-    checkpoint = ROOT / "artifacts" / "best.keras"
+    original = ROOT / "artifacts" / "best.keras"
+    assert verify_published_checkpoint(original), "Original checkpoint integrity failure"
+    checkpoint = ROOT / "artifacts" / "best_epoch9.keras"
     classes = load_classes(ROOT / "artifacts" / "classes.json")
-    assert verify_checkpoint(checkpoint), "Bundled checkpoint checksum mismatch"
+    assert verify_published_checkpoint(checkpoint), "Nine-epoch checkpoint checksum mismatch"
     assert classes and len(classes) == 7, "Class mapping unavailable"
 
     try:
@@ -43,6 +45,7 @@ def main() -> None:
         model = tf.keras.models.load_model(checkpoint, compile=False, safe_mode=True)
         optimizer_mode = "weights_only"
         optimizer_steps = None
+    assert optimizer_steps == 108, "Expected 108 saved optimizer updates for this snapshot"
     assert tuple(model.input_shape[1:]) == (20, 64, 64, 3)
     assert model.output_shape[-1] == len(classes)
 

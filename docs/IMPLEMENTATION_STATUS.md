@@ -76,3 +76,16 @@ The project owner should authorize and launch the Colab training session with a 
 - **Scientific next milestone:** After completing training and validation-based model selection, run the isolated held-out evaluation once to generate genuine test metrics, confusion matrix and comparison evidence. Preserve the original and newer checkpoints until replacement is justified.
 
 **Next resume point:** Public Streamlit Sharing setting + anonymous browser upload verification; then execute resume notebook under authenticated Drive/GPU. The GitHub code and CI are integrated, but public inference and final trained accuracy remain unverified.
+
+## Next deployment milestone — nine-epoch snapshot recovery (2026-11-08 13:35 UTC)
+
+- Rechecked `main` at `241388f303a2b677fbc6d0abb87ddd4b8bed6882`; no intervening commits/open PRs at start of the audit.
+- Latest `HAR_Results/cnn_lstm_3/best.keras` in the already-connected Drive was modified **2026-11-08 13:17:34 UTC**. Its SHA-256 is `56dd0103de1273fd31f22c1c0146ef9abf3dbef5998608cca1c3ff30b668fd1a`; size 2,774,833 bytes; saved optimizer iterations **108**, equal to nine 12-batch epochs.
+- The linked executed notebook was updated around **13:22 UTC** and contains nine complete epoch summaries. Highest reported validation accuracy **0.35 (epoch 8)**; epoch 9 validation accuracy **0.25**, validation loss **1.8029**. Epoch 10 started but did not finish in the saved output. There are still no final held-out test metrics.
+- The newer checkpoint was independently loaded with Keras 3.13.2 on the Torch backend, with expected dimensions and finite 7-way softmax output. **No new training, dataset download or held-out test inference** was performed in this audit.
+- An additive feature branch `feature/har-deploy-nine-epoch-checkpoint-20261108` stores the new archive as `artifacts/best_epoch9.keras`, pins its SHA-256, preserves `artifacts/best.keras` as a rollback, and adds version-specific metadata/history.
+- Streamlit changes on this branch select the newer verified candidate, default to the **Predict Activity** page, keep optional custom-model uploads under Advanced, and avoid trying to play ZIP-disguised videos in a browser's raw video player.
+- GitHub source tests passed after correcting one test-fixture issue; a full TensorFlow/Streamlit smoke test must pass for the PR before merging.
+- Public Streamlit access previously returned an HTTP **303 redirect to Streamlit authentication**. Changing this account-level sharing setting requires a signed-in app owner. Code changes do not establish anonymous access.
+
+**Next exact checkpoint:** Merge the new candidate only after full CI, then verify live anonymous Streamlit access and real upload prediction. Resume the most recent Drive checkpoint in authorized Colab only if its ongoing run did not finish; never repeat completed epochs or overwrite it just to improve the public demo.

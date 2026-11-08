@@ -9,6 +9,9 @@ on:
       - "scripts/smoke_*.py"
       - ".github/workflows/inference-smoke.yml"
       - "artifacts/best.keras"
+      - "artifacts/best_epoch9.keras"
+      - "artifacts/history_epoch9.csv"
+      - "artifacts/run_metadata_epoch9.json"
       - "artifacts/classes.json"
   push:
     branches: [main]

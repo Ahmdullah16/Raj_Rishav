@@ -95,23 +95,32 @@ def get_split():
     return rows, get_dataset_summary(rows)
 
 
-def artifacts():
-    # Read repository/local artifacts only; do not auto-fetch private Drive files.
+def artifacts(selected_checkpoint=None):
+    # Match visible training history/provenance to the checkpoint actually deployed.
     paths = [RESULTS_DIR, MODEL_DIR]
     def find(name):
         for base in paths:
             if (base / name).is_file():
                 return base / name
         return paths[0] / name
-    return {'history': find('history.csv'), 'metrics': find('test_metrics.json'),
-            'matrix': find('confusion_matrix.csv'), 'meta': find('run_metadata.json'),
+    nine = bool(selected_checkpoint and selected_checkpoint.name == 'best_epoch9.keras')
+    return {'history': find('history_epoch9.csv' if nine else 'history.csv'),
+            'metrics': find('test_metrics.json'),
+            'matrix': find('confusion_matrix.csv'),
+            'meta': find('run_metadata_epoch9.json' if nine else 'run_metadata.json'),
             'comparison': find('model_comparison.csv')}
 
 
 @st.cache_resource(show_spinner=False)
 def resolve_checkpoint():
-    for path in (MODEL_DIR/'best.keras', RESULTS_DIR/'best.keras', MODEL_DIR/'final.keras'):
+    from har.checkpoint import verify_published_checkpoint
+    for path in (MODEL_DIR/'best_epoch9.keras', MODEL_DIR/'best.keras',
+                 RESULTS_DIR/'best.keras', MODEL_DIR/'final.keras'):
         if path.is_file():
+            # Public bundled versions are immutable and cryptographically pinned.
+            if path.parent == MODEL_DIR and not verify_published_checkpoint(path):
+                st.warning(f'Bundled {path.name} failed integrity verification; not loading.')
+                continue
             for classes in (path.parent/'classes.json', MODEL_DIR/'classes.json', RESULTS_DIR/'classes.json'):
                 if classes.is_file():
                     return path, classes
@@ -145,7 +154,7 @@ except Exception as error:
     st.stop()
 
 model_path, labels_path = resolve_checkpoint()
-result_files = artifacts()
+result_files = artifacts(model_path)
 metrics = read_optional_json(result_files['metrics'])
 metadata = read_optional_json(result_files['meta'])
 
@@ -153,13 +162,14 @@ with st.sidebar:
     st.markdown('## 🎬 HAR Lab')
     st.caption('IIT Guwahati • CNN + LSTM')
     st.divider()
-    menu = ['Overview', 'Dataset & Splits', 'Predict Activity', 'Results',
+    menu = ['Predict Activity', 'Overview', 'Dataset & Splits', 'Results',
             'Compare Models', 'Sensitivity & Diagnostics', 'Concepts & Mathematics', 'Downloads', 'About']
     page = st.radio('Explore', menu, label_visibility='collapsed', key='page')
     st.divider()
     if model_path:
-        st.success('Existing CNN–LSTM checkpoint available')
-        st.caption('Checkpoint is from an interrupted training run; independent accuracy is not verified.')
+        st.success('Verified CNN–LSTM checkpoint available')
+        model_version = '9-epoch snapshot' if model_path.name == 'best_epoch9.keras' else 'original 3-epoch snapshot'
+        st.caption(f'{model_version} • experimental recognition; held-out accuracy not measured.')
     else:
         st.info('Verified checkpoint could not be recovered automatically. Check artifact access or upload it on the Prediction page.')
         if st.session_state.get('checkpoint_download_error'):
@@ -224,8 +234,11 @@ elif page == 'Dataset & Splits':
 elif page == 'Predict Activity':
     hero('Live inference', 'Predict an Activity',
          'Upload an MP4 or other supported video. The existing CNN–LSTM checkpoint is loaded automatically when accessible.')
-    st.warning('The recovered checkpoint comes from early, interrupted training (three complete epochs recorded). Predictions are experimental, not validated recognition results.')
-    with st.expander('Checkpoint and class mapping', expanded=True):
+    if model_path:
+        st.info(f'Loaded: **{model_path.name}**. This is a versioned training checkpoint; final test accuracy is not available. Predictions are experimental.')
+    else:
+        st.warning('No verified checkpoint could be loaded. Use an appropriately trained checkpoint and its matching class mapping.')
+    with st.expander('Advanced: optional custom checkpoint and class mapping', expanded=False):
         supplied_model=st.file_uploader('Optional trained checkpoint (.keras)',type=['keras'],help='Keep model files private when necessary. Do not upload an untrained architecture.')
         supplied_classes=st.file_uploader('Optional classes.json from the same training run',type=['json'])
         if model_path and not supplied_model:st.success('Verified saved model is ready for inference; no model upload needed.')
@@ -282,8 +295,11 @@ elif page == 'Predict Activity':
                     with c1:st.caption(f'Reported video frames: {info["frame_count_reported"]}')
                     with c2:st.caption(f'Preprocessing: {t} × {h} × {w} RGB')
                     with c3:st.caption(f'Processing time: {elapsed:.2f} seconds (one video)')
-                    st.video(video)
-                    st.caption('Three of the 20 sampled RGB frames:')
+                    if info.get('was_zip'):
+                        st.caption('The uploaded file contains a ZIP-wrapped video; displaying sampled frames instead of an undecodable raw player.')
+                    else:
+                        st.video(video)
+                    st.caption('Three of the sampled RGB frames:')
                     st.image([np.asarray(x[i]*255,dtype=np.uint8) for i in [0,len(x)//2,-1]],width=150)
                     st.download_button('Download prediction CSV',scores.to_csv(index=False),file_name='har_prediction.csv',mime='text/csv')
                 except Exception as ex:

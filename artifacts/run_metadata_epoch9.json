@@ -1,0 +1,41 @@
+{
+  "variant": "cnn_lstm_3",
+  "checkpoint_file": "best_epoch9.keras",
+  "checkpoint_sha256": "56dd0103de1273fd31f22c1c0146ef9abf3dbef5998608cca1c3ff30b668fd1a",
+  "checkpoint_size_bytes": 2774833,
+  "checkpoint_optimizer_updates": 108,
+  "inferred_completed_epochs_at_batch_size_8": 9,
+  "source_checkpoint": "Google Drive HAR_Results/cnn_lstm_3/best.keras (observed 2026-11-08T13:17:34.953Z)",
+  "source_notebook": "https://drive.google.com/file/d/1MT3-qjagwKyc8w3beMbFu60OInMKk_O5/view",
+  "history_provenance": "9 completed epoch summaries transcribed exactly as rounded in executed Colab notebook stdout; not the original CSVLogger",
+  "train_split_videos": 92,
+  "val_split_videos": 20,
+  "heldout_test_videos": 20,
+  "classes": [
+    "clapping",
+    "meet_and_split",
+    "sitting",
+    "standing_still",
+    "walking",
+    "walking_while_reading_book",
+    "walking_while_using_phone"
+  ],
+  "input_shape": [
+    null,
+    20,
+    64,
+    64,
+    3
+  ],
+  "output_classes": 7,
+  "parameter_count": 225735,
+  "last_observed_validation_accuracy": 0.25,
+  "last_observed_validation_loss": 1.8029,
+  "highest_observed_validation_accuracy": 0.35,
+  "highest_observed_validation_accuracy_epoch": 8,
+  "test_evaluated_once": false,
+  "heldout_test_metrics_available": false,
+  "training_status": "in_progress_at_source_notebook_after_epoch_9",
+  "important_caveat": "This is an experimental mid-training snapshot, not a validated final human-activity classifier. Best validation accuracy is on 20 videos, not held-out test performance.",
+  "deploy_note": "Original best.keras remains untouched as three-epoch fallback."
+}

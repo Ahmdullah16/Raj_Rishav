@@ -50,3 +50,19 @@ marking a private external app as a passing browser upload test.
 Install `requirements.txt` under Python 3.11; `tensorflow-cpu` and Keras are lazily imported only for prediction. Keep upload cap 150 MB, never cache videos across visitors, and do not re-download the 2 GB dataset. Do not add Google Drive service credentials to GitHub.
 
 To improve predictive quality, resume/finish the Colab experiment and replace the checkpoint only with another **validated** model and the matching mapping, saving older artifacts and updating checksums. Create true `test_metrics.json` and `confusion_matrix.csv` after held-out evaluation.
+
+## Nine-epoch candidate rollout
+
+A newly recovered nine-epoch checkpoint is retained as
+`artifacts/best_epoch9.keras`, with pinned checksum
+`56dd0103de1273fd31f22c1c0146ef9abf3dbef5998608cca1c3ff30b668fd1a`.
+The prior `artifacts/best.keras` remains available and unchanged.
+
+Streamlit's `resolve_checkpoint()` prefers the newer checksum-verified
+archive and falls back to the original if necessary. The Prediction page is
+the default landing page. The Results page reads the matching nine-epoch
+notebook-console history; it does not display manufactured test metrics.
+
+**Important:** This is an experimental early-training model. The best observed
+validation score does not establish test accuracy. An account-level public
+sharing change is still needed if the app URL redirects to authentication.

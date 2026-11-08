@@ -28,3 +28,16 @@ After selecting and completing the final trained model, publish only authentic:
 Raw dataset footage must stay in Google Drive. Any replacement of the deployed
 checkpoint must preserve a backup, matching `classes.json`, and tested
 deployment artifact provenance.
+
+## Versioned checkpoint candidate
+
+- `best.keras`: original three-epoch model, 36 Adam updates — preserved.
+- `best_epoch9.keras`: new snapshot, nine complete epochs and 108 Adam updates.
+- `history_epoch9.csv`: rounded training and validation figures recovered from
+  executed notebook output, **not** an original Keras CSVLogger file.
+- `run_metadata_epoch9.json`: provenance, SHA-256, class mapping and limitations.
+
+Only the newer version is preferred for deployed inference, and only after
+the CI workflow verifies its checksum and an actual TensorFlow forward pass.
+Neither version has authentic held-out test accuracy. Do not copy 35% validation
+accuracy into a test-result field.

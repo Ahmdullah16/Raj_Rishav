@@ -56,3 +56,38 @@ def test_reject_wrong_labels_for_verified_weights(tmp_path, monkeypatch):
     (tmp_path / "classes.json").write_text('["walking","clapping"]')
     with pytest.raises(ValueError, match="class mapping"):
         checkpoint.materialize_checkpoint(tmp_path)
+
+
+def test_versioned_checkpoint_verification_without_overwriting_original(tmp_path, monkeypatch):
+    older = b"outdated artifact"
+    newer = b"new-epoch9-test-artifact"
+    assert len(older) != len(newer)
+    new_path = tmp_path / checkpoint.NINE_EPOCH_FILENAME
+    new_path.write_bytes(newer)
+    monkeypatch.setattr(checkpoint, "CHECKPOINT_BYTES", len(newer))
+    monkeypatch.setattr(checkpoint, "NINE_EPOCH_SHA256", hashlib.sha256(newer).hexdigest())
+    assert checkpoint.verify_published_checkpoint(new_path)
+    old_path = tmp_path / "best.keras"
+    old_path.write_bytes(older)
+    assert not checkpoint.verify_published_checkpoint(old_path)
+    new_path.write_bytes(b"tampered checkpoint")
+    assert not checkpoint.verify_published_checkpoint(new_path)
+
+
+def test_committed_checkpoint_versions_and_colab_provenance():
+    import csv
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    original = root / "artifacts" / "best.keras"
+    newer = root / "artifacts" / checkpoint.NINE_EPOCH_FILENAME
+    assert checkpoint.verify_published_checkpoint(original)
+    assert checkpoint.verify_published_checkpoint(newer)
+    assert original.read_bytes() != newer.read_bytes()
+    metadata = json.loads((root / "artifacts" / "run_metadata_epoch9.json").read_text())
+    assert metadata["checkpoint_sha256"] == checkpoint.NINE_EPOCH_SHA256
+    assert metadata["checkpoint_optimizer_updates"] == 108
+    assert metadata["heldout_test_metrics_available"] is False
+    with (root / "artifacts" / "history_epoch9.csv").open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    assert len(rows) == 9 and rows[-1]["val_loss"] == "1.8029"
