@@ -14,6 +14,11 @@ def main():
             body = response.read(80).decode("utf8", errors="replace").strip()
             result.update(status=response.status, response=body,
                           verified=response.status == 200 and body.lower() == "ok")
+    except urllib.error.HTTPError as exc:
+        result["error_type"] = "HTTPError"
+        result["status"] = exc.code
+        result["reason"] = str(exc.reason)[:100]
+        result["response_excerpt"] = exc.read(240).decode("utf8", errors="replace")
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         result["error_type"] = type(exc).__name__
         result["status"] = "unavailable"
