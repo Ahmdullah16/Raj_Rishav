@@ -6,28 +6,31 @@ The public Streamlit app is configured for [rajrishav-har.streamlit.app](https:/
 `artifacts/best.keras` is a 2.8 MB user-trained Keras model; `artifacts/classes.json` contains its exact seven-label mapping. `run_metadata.json` records verified provenance and an interrupted-training warning. The app loads the model lazily with `st.cache_resource`. Raw videos, tokens and credentials are NOT committed.
 
 
-## Public access blocker observed 2026-11-08
+## Public HTTP probe observation — browser verification still required (2026-11-08)
 
 GitHub Actions could boot the app, load the exact bundled Keras model, run a
 video inference, execute Overview/Prediction pages with AppTest, and obtain
-local HTTP 200. **The public URL is not anonymously accessible** in the same
+local HTTP 200. **The non-browser probe could not verify anonymous browser access** in the same
 probe: `https://rajrishav-har.streamlit.app/_stcore/health` answered HTTP
 **303** with repeated redirects to
-`https://share.streamlit.io/-/auth/app`. A login redirect is evidence of
-a **Streamlit account-level access restriction**, not proof that app code fails.
+`https://share.streamlit.io/-/auth/app`. A 303 login/session redirect does **not** establish that the app is private:
+Streamlit may establish a browser session using cookies and JavaScript that
+plain HTTP clients lack. A real anonymous/incognito browser check is required.
+Do not diagnose a sharing-configuration blocker from this HTTP status alone.
 
-**Required action by the signed-in Streamlit Community Cloud developer**:
+**Manual verification by the signed-in Streamlit Community Cloud developer**:
 
 1. Open [Streamlit workspace](https://share.streamlit.io/) and choose the
    workspace owning `Ahmdullah16/Raj_Rishav`.
 2. Find `rajrishav-har` → three-dot menu → **Settings** → **Sharing**.
-3. Under **Who can view this app**, select **This app is public and searchable**
-   and save. (Or use the running app's Share → Make this app public.)
+3. Under **Who can view this app**, **confirm** whether **This app is public
+   and searchable** is already selected. Change and save **only if private**.
+   The app's Share button may also offer **Make this app public**.
 4. Confirm repository `Ahmdullah16/Raj_Rishav`, branch `main`,
    entrypoint `streamlit.py`, and Python 3.11.
-5. Reopen the app in a new private/incognito browser window. The Overview and
-   Predict Activity pages must load without Streamlit sign-in. Upload a small,
-   lawful test video and verify seven model-generated probabilities.
+5. Open the app in a new private/incognito browser window. Check that a
+   non-signed-in visitor can reach Predict Activity. Upload a small, authorized
+   real MP4 and verify seven model-generated probabilities and a CSV download.
 6. If the app itself then fails, use **Manage app → Cloud logs** to diagnose
    package/version or file errors. Do not change the dataset or original
    checkpoint to work around an account-level privacy setting.
@@ -35,8 +38,11 @@ a **Streamlit account-level access restriction**, not proof that app code fails.
 Official Streamlit instructions:
 https://docs.streamlit.io/deploy/streamlit-community-cloud/share-your-app
 
-The GitHub workflow's `scripts/probe_public.py` logs HTTP status without
-marking a private external app as a passing browser upload test.
+The GitHub workflow's `scripts/probe_public.py` records redirect responses as
+**inconclusive** without making a false private/public determination. The
+`smoke_streamlit.py` CI test exercises synthetic MP4 and ZIP-wrapped MP4
+uploads through the Streamlit AppTest widget and predicts with the pinned
+checkpoint. Neither test substitutes for a public browser upload.
 
 ## Verify after integration
 1. Confirm GitHub Actions tests pass and the app is deployed from the correct `main` commit.
@@ -64,5 +70,14 @@ the default landing page. The Results page reads the matching nine-epoch
 notebook-console history; it does not display manufactured test metrics.
 
 **Important:** This is an experimental early-training model. The best observed
-validation score does not establish test accuracy. An account-level public
-sharing change is still needed if the app URL redirects to authentication.
+validation score does not establish test accuracy. The public browser state remains unverified; an HTTP authentication redirect
+alone cannot establish whether an account-level sharing change is necessary.
+
+## November 8 regression-test follow-up
+
+CI now exercises the **actual Streamlit file-uploader and prediction button**
+for a generated MP4 and a ZIP-wrapped MP4 through Streamlit AppTest. This
+verifies the upload-to-decoder-to-model-to-UI path on GitHub Actions runners.
+It is synthetic input, not a held-out test set or an external-browser test.
+The signed-in Streamlit developer must separately verify the deployed app
+from an incognito window using an authorized short real-world video.
