@@ -17,10 +17,12 @@ jobs:
           python -m pip install nbformat
           python - <<'PY'
           import ast, nbformat
-          nb=nbformat.read('notebooks/HAR_CNN_LSTM_Complete.ipynb', as_version=4)
-          for cell in nb.cells:
-              if cell.cell_type == 'code':
-                  src = '\n'.join(line for line in cell.source.splitlines() if not line.lstrip().startswith(('%', '!')))
-                  ast.parse(src)
-          print('Notebook Python cells parsed successfully')
+          from pathlib import Path
+          for notebook in Path('notebooks').glob('*.ipynb'):
+              nb=nbformat.read(str(notebook), as_version=4)
+              for cell in nb.cells:
+                  if cell.cell_type == 'code':
+                      src = '\n'.join(line for line in cell.source.splitlines() if not line.lstrip().startswith(('%', '!')))
+                      ast.parse(src)
+              print(f'Parsed notebook: {notebook}')
           PY
