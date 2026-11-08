@@ -53,6 +53,8 @@ jobs:
           else:
               raise SystemExit("Streamlit health never returned 200 ok")
           PY
+      - name: Probe public deployment health (diagnostic, non-blocking)
+        run: python scripts/probe_public.py
       - name: Print bounded app logs on failure
         if: failure()
         run: tail -n 75 /tmp/har_streamlit.log || true
