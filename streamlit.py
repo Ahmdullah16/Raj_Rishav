@@ -114,7 +114,13 @@ def resolve_checkpoint():
             for classes in (path.parent/'classes.json', MODEL_DIR/'classes.json', RESULTS_DIR/'classes.json'):
                 if classes.is_file():
                     return path, classes
-    return None, None
+    # Recover only the verified checkpoint, not the original 1.86 GB dataset.
+    from har.checkpoint import materialize_checkpoint
+    try:
+        return materialize_checkpoint(MODEL_DIR)
+    except (OSError, ValueError, RuntimeError, ImportError, Exception) as exc:
+        st.session_state['checkpoint_download_error'] = str(exc)
+        return None, None
 
 
 @st.cache_resource(show_spinner=False)
@@ -151,9 +157,12 @@ with st.sidebar:
     page = st.radio('Explore', menu, label_visibility='collapsed', key='page')
     st.divider()
     if model_path:
-        st.success('Trained checkpoint available')
+        st.success('Existing CNN–LSTM checkpoint available')
+        st.caption('Checkpoint is from an interrupted training run; independent accuracy is not verified.')
     else:
-        st.info('Checkpoint not yet published. Train in Colab or upload one on the Prediction page.')
+        st.info('Verified checkpoint could not be recovered automatically. Check artifact access or upload it on the Prediction page.')
+        if st.session_state.get('checkpoint_download_error'):
+            st.caption('Artifact recovery: ' + st.session_state['checkpoint_download_error'])
     st.caption(f'{summary["total_videos"]} videos • {summary["classes"]} classes')
     st.link_button('Open GitHub repository', GITHUB, use_container_width=True)
 
@@ -213,12 +222,12 @@ elif page == 'Dataset & Splits':
 
 elif page == 'Predict Activity':
     hero('Live inference', 'Predict an Activity',
-         'Upload a video and an actual trained model checkpoint. The model predicts a probability for each of the seven activities.')
-    st.info('Prediction requires a genuinely trained `.keras` checkpoint and its matching `classes.json`. Training code and dataset alone cannot produce valid predictions.')
+         'Upload an MP4 or other supported video. The existing CNN–LSTM checkpoint is loaded automatically when accessible.')
+    st.warning('The recovered checkpoint comes from early, interrupted training (three complete epochs recorded). Predictions are experimental, not validated recognition results.')
     with st.expander('Checkpoint and class mapping', expanded=True):
         supplied_model=st.file_uploader('Optional trained checkpoint (.keras)',type=['keras'],help='Keep model files private when necessary. Do not upload an untrained architecture.')
         supplied_classes=st.file_uploader('Optional classes.json from the same training run',type=['json'])
-        if model_path and not supplied_model:st.success('Found a checkpoint bundled with the app.')
+        if model_path and not supplied_model:st.success('Verified saved model is ready for inference; no model upload needed.')
         elif supplied_model:st.success('Uploaded model file selected; inference will load it on demand.')
         else:st.warning('No trained checkpoint is available yet.')
     video=st.file_uploader('Upload a video (.mp4, .avi, .mov, .mkv, .webm)',type=['mp4','avi','mov','mkv','webm'],key='inference_video')
@@ -252,10 +261,14 @@ elif page == 'Predict Activity':
                     h=ishape[2] or 64
                     w=ishape[3] or 64
                     if h!=w or t>100 or h>256:raise ValueError('Unsupported checkpoint shape: '+str(ishape))
+                    import time
+                    started_at=time.perf_counter()
                     info=validate_video(incoming,cache_dir=tmp/'cache')
                     x=sample_video(incoming,seq_length=int(t),image_size=int(h))
                     prediction=np.asarray(model.predict(x[None,...],verbose=0)[0],dtype=float)
-                    if not np.isfinite(prediction).all():raise ValueError('Checkpoint produced nonfinite outputs')
+                    elapsed=time.perf_counter()-started_at
+                    if not np.isfinite(prediction).all() or (prediction < 0).any() or not np.isclose(prediction.sum(),1.0,atol=0.01):
+                        raise ValueError('Checkpoint produced invalid class probabilities')
                     winner=int(prediction.argmax())
                     scores=probability_dataframe(prediction,classes)
                     st.success(f'Predicted activity: **{display_label(classes[winner])}**')
@@ -264,15 +277,19 @@ elif page == 'Predict Activity':
                     chart=px.bar(scores.sort_values('Probability'),x='Probability',y='Activity',orientation='h',
                                  range_x=[0,1],color_discrete_sequence=['#22c6aa'])
                     render_plot(chart)
-                    c1,c2=st.columns(2)
+                    c1,c2,c3=st.columns(3)
                     with c1:st.caption(f'Reported video frames: {info["frame_count_reported"]}')
                     with c2:st.caption(f'Preprocessing: {t} × {h} × {w} RGB')
+                    with c3:st.caption(f'Processing time: {elapsed:.2f} seconds (one video)')
+                    st.video(video)
+                    st.caption('Three of the 20 sampled RGB frames:')
+                    st.image([np.asarray(x[i]*255,dtype=np.uint8) for i in [0,len(x)//2,-1]],width=150)
                     st.download_button('Download prediction CSV',scores.to_csv(index=False),file_name='har_prediction.csv',mime='text/csv')
                 except Exception as ex:
                     st.error(f'Prediction could not complete: {ex}')
                     st.caption('Check that the model is trained and the class mapping is from the same training run. Some videos are ZIP archives disguised with .mp4 extensions; the app attempts to unwrap them.')
     if not can_predict:
-        st.caption('Until a trained checkpoint and class mapping are provided, the dashboard does not output fake predictions.')
+        st.caption('A verified checkpoint and matching class mapping are required; otherwise no predictions are shown.')
 
 elif page == 'Results':
     hero('Scientific evidence', 'Evaluation Results',
