@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from har.cache import sample_cached
-from har.resume import check_resume_source, write_json_atomic
+from har.resume import check_resume_source, write_json_atomic, infer_completed_epochs
 from har.data import LABELS
 
 
@@ -69,3 +69,26 @@ def test_atomic_status_roundtrip(tmp_path):
     target = tmp_path / "run" / "training_state.json"
     write_json_atomic(target, status)
     assert json.loads(target.read_text()) == status
+
+
+def test_infer_resume_epoch_from_optimizer_metadata(tmp_path):
+    import io
+    import zipfile
+    import h5py
+
+    def make_checkpoint(path, step_count):
+        memory = io.BytesIO()
+        with h5py.File(memory, "w") as h:
+            group = h.create_group("optimizer").create_group("vars")
+            group.create_dataset("0", data=np.int64(step_count))
+        with zipfile.ZipFile(path, "w") as archive:
+            archive.writestr("model.weights.h5", memory.getvalue())
+
+    path = tmp_path / "best.keras"
+    make_checkpoint(path, 60)
+    assert infer_completed_epochs(path, train_count=92, batch_size=8) == (5, 60)
+    make_checkpoint(path, 36)
+    assert infer_completed_epochs(path, 92, 8) == (3, 36)
+    make_checkpoint(path, 37)
+    with pytest.raises(ValueError, match="not a whole multiple"):
+        infer_completed_epochs(path, 92, 8)
