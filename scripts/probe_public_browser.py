@@ -71,24 +71,37 @@ def browser_probe() -> dict:
             page = context.new_page()
             try:
                 page.goto(APP_URL, wait_until="domcontentloaded", timeout=75000)
-                # Streamlit's upload button can be rendered before a native
-                # input[type=file] is mounted. The previous diagnostic waited
-                # for the input alone and falsely marked a visible page absent.
+                # Community Cloud can mount the app in a child frame. Examine
+                # all frames and use the visible label, not only hidden inputs.
                 deadline = time.monotonic() + 140
-                upload = page.locator('input[type="file"]').last
-                upload_button = page.get_by_role("button", name="Upload", exact=True)
-                heading = page.get_by_text("Predict an Activity", exact=True)
+                ui_frame = None
                 while time.monotonic() < deadline:
-                    if (heading.count() > 0 and
-                            (upload.count() > 0 or upload_button.count() > 0)):
+                    for frame in page.frames:
+                        headings = frame.locator("h1").filter(has_text="Predict an Activity")
+                        dropzone = frame.locator('[data-testid="stFileUploader"]')
+                        upload_button = frame.get_by_role("button", name="Upload", exact=True)
+                        if headings.count() and (dropzone.count() or upload_button.count()):
+                            ui_frame = frame
+                            break
+                    if ui_frame is not None:
                         break
                     page.wait_for_timeout(1500)
 
                 result["final_browser_host"] = urlsplit(page.url).netloc
-                visible = (heading.count() > 0 and
-                           (upload.count() > 0 or upload_button.count() > 0))
-                result["prediction_page_rendered"] = visible
-                if not visible:
+                result["frame_count"] = len(page.frames)
+                result["prediction_page_rendered"] = ui_frame is not None
+                if ui_frame is None:
+                    result["frame_diagnostics"] = []
+                    for frame in page.frames:
+                        result["frame_diagnostics"].append({
+                            "host": urlsplit(frame.url).netloc,
+                            "headings": frame.locator("h1").count(),
+                            "upload_buttons": frame.get_by_role(
+                                "button", name="Upload", exact=True).count(),
+                            "video_labels": frame.get_by_text(
+                                "Upload a video", exact=False).count(),
+                            "file_inputs": frame.locator('input[type="file"]').count(),
+                        })
                     result["classification"] = classify_observation(page.url)
                     return result
 
@@ -98,21 +111,20 @@ def browser_probe() -> dict:
                     "mimeType": "video/mp4",
                     "buffer": synthetic_mp4,
                 }
-                if upload.count() > 0:
-                    upload.set_input_files(selected_video)
+                file_input = ui_frame.locator('input[type="file"]').last
+                if file_input.count() > 0:
+                    file_input.set_input_files(selected_video)
                 else:
-                    # Drive the actual browser file chooser, not a nonexistent
-                    # hidden selector. No login, private data, or dataset.
                     with page.expect_file_chooser(timeout=20000) as chooser:
-                        upload_button.click(timeout=20000)
+                        ui_frame.get_by_role("button", name="Upload", exact=True).click(timeout=20000)
                     chooser.value.set_files(selected_video)
-                action = page.get_by_role("button", name="Analyze video and predict activity")
+                action = ui_frame.get_by_role("button", name="Analyze video and predict activity")
                 action.wait_for(state="visible", timeout=60000)
                 # A model download must not be needed: the verified archive is bundled.
                 action.click(timeout=60000)
-                alert = page.locator('[data-testid="stAlert"]').filter(has_text="Predicted activity:")
+                alert = ui_frame.locator('[data-testid="stAlert"]').filter(has_text="Predicted activity:")
                 alert.wait_for(state="visible", timeout=180000)
-                has_csv = page.get_by_text("Download prediction CSV").count() > 0
+                has_csv = ui_frame.get_by_text("Download prediction CSV").count() > 0
                 result.update(
                     classification=classify_observation(page.url, prediction_visible=True),
                     prediction_visible=True,
