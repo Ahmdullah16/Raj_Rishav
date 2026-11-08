@@ -34,7 +34,15 @@ def main() -> None:
     assert verify_checkpoint(checkpoint), "Bundled checkpoint checksum mismatch"
     assert classes and len(classes) == 7, "Class mapping unavailable"
 
-    model = tf.keras.models.load_model(checkpoint, compile=False, safe_mode=True)
+    try:
+        model = tf.keras.models.load_model(checkpoint, compile=True, safe_mode=True)
+        optimizer_mode = "optimizer_restored"
+        optimizer_steps = int(model.optimizer.iterations.numpy())
+    except (ValueError, TypeError) as exc:
+        print("Optimizer restoration unavailable:", str(exc)[:180])
+        model = tf.keras.models.load_model(checkpoint, compile=False, safe_mode=True)
+        optimizer_mode = "weights_only"
+        optimizer_steps = None
     assert tuple(model.input_shape[1:]) == (20, 64, 64, 3)
     assert model.output_shape[-1] == len(classes)
 
@@ -68,6 +76,8 @@ def main() -> None:
             "probabilities_sum": round(float(pred.sum()), 6),
             "inference_seconds": round(elapsed, 3),
             "tensorflow": tf.__version__,
+            "load_mode": optimizer_mode,
+            "optimizer_steps_at_load": optimizer_steps,
             "classes": classes,
         }, indent=2))
 
