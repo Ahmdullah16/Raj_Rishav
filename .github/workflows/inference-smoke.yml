@@ -1,0 +1,60 @@
+name: HAR inference and Streamlit smoke
+
+on:
+  pull_request:
+    paths:
+      - "requirements.txt"
+      - "streamlit.py"
+      - "src/har/**"
+      - "scripts/smoke_*.py"
+      - ".github/workflows/inference-smoke.yml"
+      - "artifacts/best.keras"
+      - "artifacts/classes.json"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: src
+      TF_CPP_MIN_LOG_LEVEL: "2"
+      TF_NUM_INTEROP_THREADS: "2"
+      TF_NUM_INTRAOP_THREADS: "2"
+      OMP_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install deployed dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Verify real Keras checkpoint and video inference
+        run: python scripts/smoke_inference.py
+      - name: Execute Streamlit pages
+        run: python scripts/smoke_streamlit.py
+      - name: Serve app and check HTTP health
+        run: |
+          streamlit run streamlit.py --server.headless true --server.address 127.0.0.1 --server.port 8501 > /tmp/har_streamlit.log 2>&1 &
+          python - <<'PY'
+          import time, urllib.request
+          url = "http://127.0.0.1:8501/_stcore/health"
+          for i in range(30):
+              try:
+                  with urllib.request.urlopen(url, timeout=2) as response:
+                      if response.status == 200 and response.read().strip() == b"ok":
+                          print("Streamlit HTTP health passed")
+                          break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Streamlit health never returned 200 ok")
+          PY
+      - name: Probe public deployment health (diagnostic, non-blocking)
+        run: python scripts/probe_public.py
+      - name: Print bounded app logs on failure
+        if: failure()
+        run: tail -n 75 /tmp/har_streamlit.log || true
