@@ -71,26 +71,41 @@ def browser_probe() -> dict:
             page = context.new_page()
             try:
                 page.goto(APP_URL, wait_until="domcontentloaded", timeout=75000)
-                # Allow cold Community Cloud app startup; do not authenticate.
+                # Streamlit's upload button can be rendered before a native
+                # input[type=file] is mounted. The previous diagnostic waited
+                # for the input alone and falsely marked a visible page absent.
                 deadline = time.monotonic() + 140
                 upload = page.locator('input[type="file"]').last
+                upload_button = page.get_by_role("button", name="Upload", exact=True)
+                heading = page.get_by_text("Predict an Activity", exact=True)
                 while time.monotonic() < deadline:
-                    if upload.count() > 0:
+                    if (heading.count() > 0 and
+                            (upload.count() > 0 or upload_button.count() > 0)):
                         break
                     page.wait_for_timeout(1500)
 
                 result["final_browser_host"] = urlsplit(page.url).netloc
-                result["prediction_page_rendered"] = upload.count() > 0
-                if upload.count() == 0:
+                visible = (heading.count() > 0 and
+                           (upload.count() > 0 or upload_button.count() > 0))
+                result["prediction_page_rendered"] = visible
+                if not visible:
                     result["classification"] = classify_observation(page.url)
                     return result
 
                 result["classification"] = classify_observation(page.url, uploader_visible=True)
-                upload.set_input_files({
+                selected_video = {
                     "name": "generated_public_smoke.mp4",
                     "mimeType": "video/mp4",
                     "buffer": synthetic_mp4,
-                })
+                }
+                if upload.count() > 0:
+                    upload.set_input_files(selected_video)
+                else:
+                    # Drive the actual browser file chooser, not a nonexistent
+                    # hidden selector. No login, private data, or dataset.
+                    with page.expect_file_chooser(timeout=20000) as chooser:
+                        upload_button.click(timeout=20000)
+                    chooser.value.set_files(selected_video)
                 action = page.get_by_role("button", name="Analyze video and predict activity")
                 action.wait_for(state="visible", timeout=60000)
                 # A model download must not be needed: the verified archive is bundled.
