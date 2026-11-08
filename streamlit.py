@@ -95,16 +95,19 @@ def get_split():
     return rows, get_dataset_summary(rows)
 
 
-def artifacts():
-    # Read repository/local artifacts only; do not auto-fetch private Drive files.
+def artifacts(selected_checkpoint=None):
+    # Match visible training history/provenance to the checkpoint actually deployed.
     paths = [RESULTS_DIR, MODEL_DIR]
     def find(name):
         for base in paths:
             if (base / name).is_file():
                 return base / name
         return paths[0] / name
-    return {'history': find('history.csv'), 'metrics': find('test_metrics.json'),
-            'matrix': find('confusion_matrix.csv'), 'meta': find('run_metadata.json'),
+    nine = bool(selected_checkpoint and selected_checkpoint.name == 'best_epoch9.keras')
+    return {'history': find('history_epoch9.csv' if nine else 'history.csv'),
+            'metrics': find('test_metrics.json'),
+            'matrix': find('confusion_matrix.csv'),
+            'meta': find('run_metadata_epoch9.json' if nine else 'run_metadata.json'),
             'comparison': find('model_comparison.csv')}
 
 
@@ -151,7 +154,7 @@ except Exception as error:
     st.stop()
 
 model_path, labels_path = resolve_checkpoint()
-result_files = artifacts()
+result_files = artifacts(model_path)
 metrics = read_optional_json(result_files['metrics'])
 metadata = read_optional_json(result_files['meta'])
 
