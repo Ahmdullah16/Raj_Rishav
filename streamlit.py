@@ -108,6 +108,7 @@ def artifacts():
             'comparison': find('model_comparison.csv')}
 
 
+@st.cache_resource(show_spinner=False)
 def resolve_checkpoint():
     for path in (MODEL_DIR/'best.keras', RESULTS_DIR/'best.keras', MODEL_DIR/'final.keras'):
         if path.is_file():
@@ -118,7 +119,7 @@ def resolve_checkpoint():
     from har.checkpoint import materialize_checkpoint
     try:
         return materialize_checkpoint(MODEL_DIR)
-    except (OSError, ValueError, RuntimeError, ImportError, Exception) as exc:
+    except Exception as exc:
         st.session_state['checkpoint_download_error'] = str(exc)
         return None, None
 
