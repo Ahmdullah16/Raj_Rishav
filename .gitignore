@@ -1,0 +1,30 @@
+# Generated artifacts / credentials
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+.env
+.kaggle/
+kaggle.json
+access_token
+*.keras
+*.h5
+*.hdf5
+*.tflite
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+outputs/
+training_logs/
+checkpoints/
+.DS_Store
+*.zip
+# Streamlit/Colab inference uploads and built assets
+.streamlit/secrets.toml
+artifacts/*.keras
+artifacts/*.h5
+artifacts/*.hdf5
+outputs/

@@ -1,0 +1,133 @@
+video_path,activity,bytes,split
+Human Activity Recognition - Video Dataset/Clapping/Clapping (1).mp4,clapping,9962389,test
+Human Activity Recognition - Video Dataset/Clapping/Clapping (10).mp4,clapping,9850450,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (100).mp4,clapping,9786405,val
+Human Activity Recognition - Video Dataset/Clapping/Clapping (101).mp4,clapping,9969384,test
+Human Activity Recognition - Video Dataset/Clapping/Clapping (102).mp4,clapping,10001456,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (103).mp4,clapping,9172716,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (104).mp4,clapping,10071049,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (105).mp4,clapping,9999987,val
+Human Activity Recognition - Video Dataset/Clapping/Clapping (106).mp4,clapping,9559995,test
+Human Activity Recognition - Video Dataset/Clapping/Clapping (107).mp4,clapping,10019698,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (108).mp4,clapping,8032132,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (109).mp4,clapping,10970956,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (11).mp4,clapping,9665400,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (110).mp4,clapping,10349626,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (111).mp4,clapping,9611252,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (112).mp4,clapping,9887345,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (113).mp4,clapping,9135669,val
+Human Activity Recognition - Video Dataset/Clapping/Clapping (114).mp4,clapping,9692145,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (115).mp4,clapping,10112149,train
+Human Activity Recognition - Video Dataset/Clapping/Clapping (116).mp4,clapping,7995748,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (108).mp4,meet_and_split,10196044,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (118).mp4,meet_and_split,7763069,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (13).mp4,meet_and_split,9406839,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (136).mp4,meet_and_split,10969615,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (144).mp4,meet_and_split,9281317,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (147).mp4,meet_and_split,7733489,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (21).mp4,meet_and_split,12672754,test
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (23).mp4,meet_and_split,14195308,val
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (24).mp4,meet_and_split,11016569,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (31).mp4,meet_and_split,6298340,val
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (34).mp4,meet_and_split,9821939,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (38).mp4,meet_and_split,9200092,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (65).mp4,meet_and_split,9496510,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (66).mp4,meet_and_split,10801208,test
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (70).mp4,meet_and_split,8076800,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (77).mp4,meet_and_split,8203357,val
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (80).mp4,meet_and_split,8053334,train
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (91).mp4,meet_and_split,9523033,test
+Human Activity Recognition - Video Dataset/Meet and Split/Meet and Split (97).mp4,meet_and_split,7498180,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (103).mp4,sitting,11813367,val
+Human Activity Recognition - Video Dataset/Sitting/Sitting (109).mp4,sitting,12145224,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (119).mp4,sitting,17548820,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (136).mp4,sitting,21329754,test
+Human Activity Recognition - Video Dataset/Sitting/Sitting (137).mp4,sitting,21690724,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (151).mp4,sitting,14236812,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (22).mp4,sitting,26333175,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (23).mp4,sitting,25373731,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (38).mp4,sitting,17583537,val
+Human Activity Recognition - Video Dataset/Sitting/Sitting (44).mp4,sitting,18256690,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (52).mp4,sitting,17325328,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (60).mp4,sitting,15625119,test
+Human Activity Recognition - Video Dataset/Sitting/Sitting (64).mp4,sitting,19081408,val
+Human Activity Recognition - Video Dataset/Sitting/Sitting (78).mp4,sitting,23671143,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (85).mp4,sitting,16153374,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (9).mp4,sitting,20830195,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (91).mp4,sitting,11359785,train
+Human Activity Recognition - Video Dataset/Sitting/Sitting (96).mp4,sitting,10184341,test
+Human Activity Recognition - Video Dataset/Sitting/Sitting (97).mp4,sitting,17776271,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (10).mp4,standing_still,25448047,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (101).mp4,standing_still,29839636,test
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (108).mp4,standing_still,29694285,test
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (115).mp4,standing_still,10781273,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (13).mp4,standing_still,26496559,val
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (137).mp4,standing_still,10224693,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (141).mp4,standing_still,16107383,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (159).mp4,standing_still,22977469,test
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (167).mp4,standing_still,26489398,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (22).mp4,standing_still,26471009,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (3).mp4,standing_still,28160229,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (34).mp4,standing_still,26265052,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (35).mp4,standing_still,26045640,val
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (39).mp4,standing_still,25589899,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (47).mp4,standing_still,24040694,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (74).mp4,standing_still,22924054,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (88).mp4,standing_still,24097678,train
+Human Activity Recognition - Video Dataset/Standing Still/Standing Still (90).mp4,standing_still,24308333,train
+Human Activity Recognition - Video Dataset/Walking/Walking (112).mp4,walking,9406863,train
+Human Activity Recognition - Video Dataset/Walking/Walking (120).mp4,walking,9665201,train
+Human Activity Recognition - Video Dataset/Walking/Walking (132).mp4,walking,4125192,test
+Human Activity Recognition - Video Dataset/Walking/Walking (134).mp4,walking,8027217,train
+Human Activity Recognition - Video Dataset/Walking/Walking (142).mp4,walking,9975366,train
+Human Activity Recognition - Video Dataset/Walking/Walking (147).mp4,walking,11423786,test
+Human Activity Recognition - Video Dataset/Walking/Walking (165).mp4,walking,13388446,train
+Human Activity Recognition - Video Dataset/Walking/Walking (3).mp4,walking,9930628,val
+Human Activity Recognition - Video Dataset/Walking/Walking (31).mp4,walking,11011139,test
+Human Activity Recognition - Video Dataset/Walking/Walking (42).mp4,walking,12118884,train
+Human Activity Recognition - Video Dataset/Walking/Walking (45).mp4,walking,11391373,train
+Human Activity Recognition - Video Dataset/Walking/Walking (5).mp4,walking,9330355,train
+Human Activity Recognition - Video Dataset/Walking/Walking (67).mp4,walking,12374661,train
+Human Activity Recognition - Video Dataset/Walking/Walking (75).mp4,walking,14431372,train
+Human Activity Recognition - Video Dataset/Walking/Walking (78).mp4,walking,11429736,train
+Human Activity Recognition - Video Dataset/Walking/Walking (83).mp4,walking,9886464,val
+Human Activity Recognition - Video Dataset/Walking/Walking (95).mp4,walking,10017261,train
+Human Activity Recognition - Video Dataset/Walking/Walking (97).mp4,walking,10020246,val
+Human Activity Recognition - Video Dataset/Walking/Walking (99).mp4,walking,9976918,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (1).mp4,walking_while_reading_book,8796233,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (108).mp4,walking_while_reading_book,9093675,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (117).mp4,walking_while_reading_book,10884350,test
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (121).mp4,walking_while_reading_book,10381235,val
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (129).mp4,walking_while_reading_book,9435074,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (143).mp4,walking_while_reading_book,11994790,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (157).mp4,walking_while_reading_book,10945302,test
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (173).mp4,walking_while_reading_book,12037754,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (35).mp4,walking_while_reading_book,13764874,test
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (38).mp4,walking_while_reading_book,8526874,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (42).mp4,walking_while_reading_book,11173285,val
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (48).mp4,walking_while_reading_book,15120273,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (54).mp4,walking_while_reading_book,13613724,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (57).mp4,walking_while_reading_book,9318436,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (6).mp4,walking_while_reading_book,10405855,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (66).mp4,walking_while_reading_book,11394768,val
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (76).mp4,walking_while_reading_book,8835623,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (84).mp4,walking_while_reading_book,9512799,train
+Human Activity Recognition - Video Dataset/Walking While Reading Book/Walking While Reading Book (90).mp4,walking_while_reading_book,10495205,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (1).mp4,walking_while_using_phone,38453358,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (103).mp4,walking_while_using_phone,17761521,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (113).mp4,walking_while_using_phone,20014051,val
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (124).mp4,walking_while_using_phone,7366632,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (128).mp4,walking_while_using_phone,6719857,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (142).mp4,walking_while_using_phone,6653624,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (31).mp4,walking_while_using_phone,21394911,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (39).mp4,walking_while_using_phone,20153117,val
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (47).mp4,walking_while_using_phone,24226334,val
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (49).mp4,walking_while_using_phone,26191150,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (51).mp4,walking_while_using_phone,26844384,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (52).mp4,walking_while_using_phone,10253393,test
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (58).mp4,walking_while_using_phone,17408303,test
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (63).mp4,walking_while_using_phone,16266918,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (65).mp4,walking_while_using_phone,12028411,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (73).mp4,walking_while_using_phone,14348513,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (84).mp4,walking_while_using_phone,17726467,train
+Human Activity Recognition - Video Dataset/Walking While Using Phone/Walking While Using Phone (97).mp4,walking_while_using_phone,16416375,train

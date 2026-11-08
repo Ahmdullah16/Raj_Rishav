@@ -1,0 +1,60 @@
+{
+  "source": "Kaggle: sharjeelmazhar/human-activity-recognition-video-dataset",
+  "dataset_is_not_ucf101": true,
+  "seed": 42,
+  "video_count": 132,
+  "total_video_bytes": 1862222433,
+  "classes": [
+    "clapping",
+    "meet_and_split",
+    "sitting",
+    "standing_still",
+    "walking",
+    "walking_while_reading_book",
+    "walking_while_using_phone"
+  ],
+  "splits": {
+    "train": 92,
+    "val": 20,
+    "test": 20
+  },
+  "counts_by_class_and_split": {
+    "clapping": {
+      "train": 14,
+      "val": 3,
+      "test": 3
+    },
+    "meet_and_split": {
+      "train": 13,
+      "val": 3,
+      "test": 3
+    },
+    "sitting": {
+      "train": 13,
+      "val": 3,
+      "test": 3
+    },
+    "standing_still": {
+      "train": 13,
+      "val": 2,
+      "test": 3
+    },
+    "walking": {
+      "train": 13,
+      "val": 3,
+      "test": 3
+    },
+    "walking_while_reading_book": {
+      "train": 13,
+      "val": 3,
+      "test": 3
+    },
+    "walking_while_using_phone": {
+      "train": 13,
+      "val": 3,
+      "test": 2
+    }
+  },
+  "warning": "Random video-level splits can leak actors/scenes. Use group-based splits where group IDs exist.",
+  "results_note": "No model training/evaluation metrics are implied by this split."
+}
