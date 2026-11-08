@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import io
+import runpy
 import urllib.error
+from pathlib import Path
 
-from scripts.probe_public import URL, probe
+_source = runpy.run_path(str(Path(__file__).resolve().parents[1] / "scripts" / "probe_public.py"))
+URL, probe = _source["URL"], _source["probe"]
 
 
 class StubOpener:
