@@ -71,36 +71,74 @@ def browser_probe() -> dict:
             page = context.new_page()
             try:
                 page.goto(APP_URL, wait_until="domcontentloaded", timeout=75000)
-                # Allow cold Community Cloud app startup; do not authenticate.
+                # Community Cloud can mount the app in a child frame. Examine
+                # all frames and use the visible label, not only hidden inputs.
                 deadline = time.monotonic() + 140
-                upload = page.locator('input[type="file"]').last
+                ui_frame = None
                 while time.monotonic() < deadline:
-                    if upload.count() > 0:
+                    for frame in page.frames:
+                        headings = frame.locator("h1").filter(has_text="Predict an Activity")
+                        dropzone = frame.locator('[data-testid="stFileUploader"]')
+                        upload_button = frame.get_by_role("button", name="Upload", exact=True)
+                        if headings.count() and (dropzone.count() or upload_button.count()):
+                            ui_frame = frame
+                            break
+                    if ui_frame is not None:
                         break
                     page.wait_for_timeout(1500)
 
                 result["final_browser_host"] = urlsplit(page.url).netloc
-                result["prediction_page_rendered"] = upload.count() > 0
-                if upload.count() == 0:
+                result["frame_count"] = len(page.frames)
+                result["prediction_page_rendered"] = ui_frame is not None
+                if ui_frame is None:
+                    result["frame_diagnostics"] = []
+                    for frame in page.frames:
+                        result["frame_diagnostics"].append({
+                            "host": urlsplit(frame.url).netloc,
+                            "headings": frame.locator("h1").count(),
+                            "upload_buttons": frame.get_by_role(
+                                "button", name="Upload", exact=True).count(),
+                            "video_labels": frame.get_by_text(
+                                "Upload a video", exact=False).count(),
+                            "file_inputs": frame.locator('input[type="file"]').count(),
+                        })
                     result["classification"] = classify_observation(page.url)
                     return result
 
                 result["classification"] = classify_observation(page.url, uploader_visible=True)
-                upload.set_input_files({
+                selected_video = {
                     "name": "generated_public_smoke.mp4",
                     "mimeType": "video/mp4",
                     "buffer": synthetic_mp4,
-                })
-                action = page.get_by_role("button", name="Analyze video and predict activity")
+                }
+                file_input = ui_frame.locator('input[type="file"]').last
+                if file_input.count() > 0:
+                    file_input.set_input_files(selected_video)
+                else:
+                    with page.expect_file_chooser(timeout=20000) as chooser:
+                        ui_frame.get_by_role("button", name="Upload", exact=True).click(timeout=20000)
+                    chooser.value.set_files(selected_video)
+                action = ui_frame.get_by_role("button", name="Analyze video and predict activity")
                 action.wait_for(state="visible", timeout=60000)
                 # A model download must not be needed: the verified archive is bundled.
                 action.click(timeout=60000)
-                alert = page.locator('[data-testid="stAlert"]').filter(has_text="Predicted activity:")
+                alert = ui_frame.locator('[data-testid="stAlert"]').filter(has_text="Predicted activity:")
                 alert.wait_for(state="visible", timeout=180000)
-                has_csv = page.get_by_text("Download prediction CSV").count() > 0
                 result.update(
                     classification=classify_observation(page.url, prediction_visible=True),
                     prediction_visible=True,
+                )
+                # Streamlit renders the success alert before the Plotly chart,
+                # sampled frames, and download button are finished. Wait for
+                # the *completed* results screen instead of sampling too early.
+                download = ui_frame.get_by_text("Download prediction CSV", exact=True)
+                try:
+                    download.wait_for(state="visible", timeout=90000)
+                    has_csv = True
+                except Exception as exc:
+                    has_csv = False
+                    result["csv_wait_error"] = type(exc).__name__
+                result.update(
                     csv_download_control_visible=has_csv,
                     verified=bool(has_csv),
                 )
