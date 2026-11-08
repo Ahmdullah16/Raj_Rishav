@@ -17,6 +17,9 @@ from .data import LABELS
 CHECKPOINT_DRIVE_ID = "1ou9A7YUm_6iwq0V_M4ul66Fz0pK23psP"
 CHECKPOINT_SHA256 = "1aef90812550db788c9824699caad01379de08ab0895c3963e5f1a367f98b537"
 CHECKPOINT_BYTES = 2774833
+# Published on 2026-11-08 as an additive version; never overwrite the original.
+NINE_EPOCH_SHA256 = "56dd0103de1273fd31f22c1c0146ef9abf3dbef5998608cca1c3ff30b668fd1a"
+NINE_EPOCH_FILENAME = "best_epoch9.keras"
 CLASS_ORDER = tuple(sorted(LABELS))
 MAX_CHECKPOINT_BYTES = 12_000_000
 
@@ -33,6 +36,18 @@ def verify_checkpoint(path: str | Path) -> bool:
     path = Path(path)
     return (path.is_file() and path.stat().st_size == CHECKPOINT_BYTES
             and sha256_file(path) == CHECKPOINT_SHA256)
+
+
+
+def verify_published_checkpoint(path: str | Path) -> bool:
+    """Verify only pinned, known GitHub-deployed checkpoint versions."""
+    path = Path(path)
+    expected = {
+        "best.keras": CHECKPOINT_SHA256,
+        NINE_EPOCH_FILENAME: NINE_EPOCH_SHA256,
+    }.get(path.name)
+    return bool(expected and path.is_file() and path.stat().st_size == CHECKPOINT_BYTES
+                and sha256_file(path) == expected)
 
 
 def materialize_checkpoint(target_dir: str | Path, downloader=None) -> tuple[Path, Path]:
