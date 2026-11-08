@@ -42,6 +42,31 @@ def write_json_atomic(path: Path, obj: dict) -> None:
         tmp.unlink(missing_ok=True)
 
 
+def infer_completed_epochs(source: Path, train_count: int, batch_size: int) -> tuple[int, int]:
+    """Infer completed epochs only when saved Adam updates cover full epochs.
+
+    Read optimizer iteration count directly from the existing Keras ZIP.
+    Refuse to guess when the checkpoint is a partial epoch or batch size differs.
+    """
+    import io
+    import zipfile
+    import h5py
+
+    if train_count <= 0 or batch_size <= 0:
+        raise ValueError("Train count and batch size must be positive")
+    with zipfile.ZipFile(source) as archive:
+        with h5py.File(io.BytesIO(archive.read("model.weights.h5")), "r") as weights:
+            if "optimizer/vars/0" not in weights:
+                raise ValueError("Checkpoint has no optimizer iteration metadata")
+            steps = int(weights["optimizer/vars/0"][()])
+    per_epoch = (train_count + batch_size - 1) // batch_size
+    if steps <= 0 or steps % per_epoch:
+        raise ValueError(f"Checkpoint reports {steps} optimizer updates, not a whole "
+                         f"multiple of {per_epoch} updates per epoch; verify progress "
+                         "before continuing")
+    return steps // per_epoch, steps
+
+
 def check_resume_source(source: Path, labels_path: Path, labels: list[str],
                         output: Path, initial_epoch: int | None) -> None:
     if not source.is_file():
@@ -64,8 +89,25 @@ def run(args) -> None:
     mapping = Path(args.class_map)
     state_path = output / "training_state.json"
     old_state = json.loads(state_path.read_text()) if state_path.exists() else None
-    original_epoch = args.initial_epoch
+    # Read saved optimizer progress instead of assuming the original three epochs.
+    # Google Drive may now contain a *newer* checkpoint than the original GitHub copy.
+    try:
+        inferred_epoch, saved_updates = infer_completed_epochs(
+            source, int((df.split == "train").sum()), args.batch_size)
+    except (OSError, KeyError, ValueError) as exc:
+        if args.initial_epoch is None:
+            raise ValueError("Cannot infer saved optimizer progress. Provide a "
+                             "verified --initial-epoch and inspect the model first.") from exc
+        inferred_epoch, saved_updates = None, None
+    if (inferred_epoch is not None and args.initial_epoch is not None
+            and inferred_epoch != args.initial_epoch):
+        raise ValueError(f"Checkpoint contains {saved_updates} optimizer updates "
+                         f"({inferred_epoch} complete epochs at this batch size), "
+                         f"not the requested --initial-epoch {args.initial_epoch}")
+    original_epoch = inferred_epoch if args.initial_epoch is None else args.initial_epoch
     if old_state is not None:
+        if args.initial_epoch is not None and args.initial_epoch != old_state["initial_epoch"]:
+            raise ValueError("Requested initial epoch differs from the persisted run")
         original_epoch = old_state["initial_epoch"]
     check_resume_source(source, mapping, labels, output, original_epoch)
     signature = {
@@ -73,6 +115,7 @@ def run(args) -> None:
         "splits_sha256": checksum(args.splits),
         "class_order": labels,
         "initial_epoch": original_epoch,
+        "source_optimizer_updates": saved_updates,
         "target_epochs": args.epochs,
         "seed": args.seed,
         "batch_size": args.batch_size,
@@ -206,7 +249,7 @@ def main() -> None:
     parser.add_argument("--splits", default="data/train_val_test_splits_70_15_15.csv")
     parser.add_argument("--resume-from", required=True, help="Original checkpoint; never overwritten")
     parser.add_argument("--class-map", default="artifacts/classes.json")
-    parser.add_argument("--initial-epoch", type=int, help="Previously completed source epochs, e.g. 3")
+    parser.add_argument("--initial-epoch", type=int, help="Override auto-inference only when verified; mismatches are rejected")
     parser.add_argument("--epochs", type=int, default=25, help="Total target epochs")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--seed", type=int, default=42)
