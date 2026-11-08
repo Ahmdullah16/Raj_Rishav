@@ -47,6 +47,48 @@ Integer rounding makes these the closest possible whole-video totals to a 70/15/
 
 The notebook is self-contained; it does not require downloading the Kaggle dataset again and does not assume `tensorflow` is available outside Colab.
 
+## Resume the interrupted November 8 CNN–LSTM 3 training (recommended)
+
+**Do not run the old fresh-training section to continue the checkpoint.**
+The original saved `best.keras` already contains the CNN–LSTM weights and a
+compiled Adam optimizer with 36 iterations. Only three epochs finished; test
+metrics remain unavailable.
+
+**[Open the dedicated resume notebook in Colab](https://colab.research.google.com/github/Ahmdullah16/Raj_Rishav/blob/main/notebooks/HAR_Resume_Colab.ipynb)**
+
+This notebook mounts the existing Drive folder, leaves the 1.862 GB dataset
+where it already lives, verifies the original checkpoint and exact seven-class
+order, then invokes `har.resume` using a **new** persistent results directory
+(`HAR_Results/cnn_lstm_3_resumed_v1`). Its local 256 MB cache stores sampled
+RGB tensors to avoid repeatedly decoding Google Drive videos. It checkpoints
+training progress at each completed epoch and preserves the original source
+checkpoint. On restart, a compatible backup must exist for a partially
+completed continuation.
+
+Run from an environment with TensorFlow and access to the existing mounted Drive:
+
+```bash
+PYTHONPATH=src python -m har.resume \
+  --data-root '/content/drive/MyDrive/RAJ Rishav/HAR_Kaggle_Subset' \
+  --splits data/train_val_test_splits_70_15_15.csv \
+  --resume-from '/content/drive/MyDrive/RAJ Rishav/HAR_Results/cnn_lstm_3/best.keras' \
+  --class-map artifacts/classes.json \
+  --initial-epoch 3 --epochs 25 --batch-size 8 \
+  --output-dir '/content/drive/MyDrive/RAJ Rishav/HAR_Results/cnn_lstm_3_resumed_v1' \
+  --cache-dir /content/har_preprocessed --max-cache-mb 256
+```
+
+Only **after** final model selection based on validation results, run this
+command with `--evaluate-only` added to obtain a single test evaluation.
+The runner refuses to report final metrics or repeat test evaluation unless
+there is evidence of a completed fit and no prior `test_metrics.json`.
+
+A separate full-dependency [GitHub Actions smoke workflow](.github/workflows/inference-smoke.yml)
+loads the real bundled checkpoint with TensorFlow, predicts from a small
+synthetic video, executes the Streamlit Overview and Predict Activity pages,
+and tests local HTTP health. These smoke tests **do not** establish final
+recognition accuracy or publicly deployed video-upload success.
+
 ## Local run
 
 ```bash
