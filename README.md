@@ -51,14 +51,16 @@ The notebook is self-contained; it does not require downloading the Kaggle datas
 
 **Do not run the old fresh-training section to continue the checkpoint.**
 The original saved `best.keras` already contains the CNN–LSTM weights and a
-compiled Adam optimizer with 36 iterations. Only three epochs finished; test
-metrics remain unavailable.
+compiled Adam optimizer with 36 iterations. The original GitHub copy completed three epochs, but the linked Drive checkpoint
+may have advanced further. The runner inspects its saved optimizer updates and
+refuses to repeat or guess at incomplete epochs. Test metrics remain unavailable.
 
 **[Open the dedicated resume notebook in Colab](https://colab.research.google.com/github/Ahmdullah16/Raj_Rishav/blob/main/notebooks/HAR_Resume_Colab.ipynb)**
 
 This notebook mounts the existing Drive folder, leaves the 1.862 GB dataset
 where it already lives, verifies the original checkpoint and exact seven-class
-order, then invokes `har.resume` using a **new** persistent results directory
+order, then invokes `har.resume` using the automatically detected completed epoch
+count and a **new** persistent results directory
 (`HAR_Results/cnn_lstm_3_resumed_v1`). Its local 256 MB cache stores sampled
 RGB tensors to avoid repeatedly decoding Google Drive videos. It checkpoints
 training progress at each completed epoch and preserves the original source
@@ -73,10 +75,18 @@ PYTHONPATH=src python -m har.resume \
   --splits data/train_val_test_splits_70_15_15.csv \
   --resume-from '/content/drive/MyDrive/RAJ Rishav/HAR_Results/cnn_lstm_3/best.keras' \
   --class-map artifacts/classes.json \
-  --initial-epoch 3 --epochs 25 --batch-size 8 \
+  --epochs 25 --batch-size 8 \
   --output-dir '/content/drive/MyDrive/RAJ Rishav/HAR_Results/cnn_lstm_3_resumed_v1' \
   --cache-dir /content/har_preprocessed --max-cache-mb 256
 ```
+
+
+The original GitHub checkpoint records 36 Adam updates (three 12-batch epochs).
+The checkpoint observed in Drive at 2026-11-08 11:33:34 records **60** updates
+(five 12-batch epochs), and has a different SHA-256 digest. Do **not** assume
+`--initial-epoch 3` for that updated file. The runner automatically checks
+optimizer iterations against the frozen 92-video train split and batch size;
+if progress is not an exact epoch multiple, it stops instead of guessing.
 
 Only **after** final model selection based on validation results, run this
 command with `--evaluate-only` added to obtain a single test evaluation.
