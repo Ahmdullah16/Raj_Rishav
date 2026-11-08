@@ -8,3 +8,6 @@ tensorflow-cpu>=2.16,<2.19
 scikit-learn>=1.3,<2
 matplotlib>=3.7,<4
 seaborn>=0.12,<1
+
+# Fetch the small public training checkpoint only when it is absent.
+gdown>=5.2,<6

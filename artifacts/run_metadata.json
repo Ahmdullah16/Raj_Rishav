@@ -1,0 +1,59 @@
+{
+  "variant": "cnn_lstm_3",
+  "classes": [
+    "clapping",
+    "meet_and_split",
+    "sitting",
+    "standing_still",
+    "walking",
+    "walking_while_reading_book",
+    "walking_while_using_phone"
+  ],
+  "training_status": "interrupted_after_three_complete_epochs",
+  "checkpoint_source": "Existing Google Drive HAR_Results/cnn_lstm_3/best.keras (not newly trained)",
+  "checkpoint_sha256": "1aef90812550db788c9824699caad01379de08ab0895c3963e5f1a367f98b537",
+  "checkpoint_keras_version": "3.13.2",
+  "checkpoint_saved_at": "2026-11-08T10:41:18 (archive metadata; timezone unspecified)",
+  "source_notebook": "https://drive.google.com/file/d/1MT3-qjagwKyc8w3beMbFu60OInMKk_O5/view",
+  "input_shape": [
+    null,
+    20,
+    64,
+    64,
+    3
+  ],
+  "output_classes": 7,
+  "parameter_count": 225735,
+  "observed_completed_epochs": 3,
+  "training_log_last_partial_epoch": 4,
+  "validation_accuracy_at_completed_epochs": [
+    0.15,
+    0.15,
+    0.15
+  ],
+  "validation_loss_at_completed_epochs": [
+    1.9452,
+    1.9433,
+    1.9418
+  ],
+  "training_accuracy_at_completed_epochs": [
+    0.1087,
+    0.1957,
+    0.1304
+  ],
+  "training_loss_at_completed_epochs": [
+    1.9703,
+    1.9446,
+    1.9461
+  ],
+  "history_provenance": "Recovered rounded figures from saved Colab cell-17 stdout; original history.csv is empty.",
+  "preprocessing": "20 uniformly sampled frames, resize 64x64 RGB, divide by 255",
+  "split_counts": {
+    "train": 92,
+    "val": 20,
+    "test": 20
+  },
+  "heldout_test_metrics_available": false,
+  "local_technical_validation": "Keras 3.13.2 torch backend: load_model, shapes, 7-way probability test, and one real ZIP-wrapped video prediction succeeded",
+  "important_caveat": "Early checkpoint, validation accuracy 15% on 20 validation videos. No valid final test accuracy, precision, recall or F1 yet. Do not present as accurate."
+}
