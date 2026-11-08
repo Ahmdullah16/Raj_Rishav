@@ -7,6 +7,7 @@ accuracy measurement and does not access/download the research dataset.
 from __future__ import annotations
 
 import io
+import os
 import tempfile
 import zipfile
 from pathlib import Path
@@ -90,13 +91,25 @@ def main() -> None:
         wrapped = io.BytesIO()
         with zipfile.ZipFile(wrapped, mode="w") as archive:
             archive.writestr("inside/video.mp4", video)
-        uploader = app.file_uploader(key="inference_video")
-        uploader.set_value(("wrapped.mp4", wrapped.getvalue(), "video/mp4"))
-        app.run()
-        assert_no_exception(app, "ZIP-wrapped MP4 upload")
-        assert_prediction(app, "ZIP-wrapped MP4")
-        if not any("ZIP-wrapped video" in item.value for item in app.caption):
-            raise AssertionError("ZIP-wrapped video was not identified in UI")
+        # Visitor uploads must not create a persistent cross-session ZIP cache.
+        sentinel = Path(folder) / "forbidden_shared_video_cache"
+        previous_cache = os.environ.get("HAR_VIDEO_CACHE")
+        os.environ["HAR_VIDEO_CACHE"] = str(sentinel)
+        try:
+            uploader = app.file_uploader(key="inference_video")
+            uploader.set_value(("wrapped.mp4", wrapped.getvalue(), "video/mp4"))
+            app.run()
+            assert_no_exception(app, "ZIP-wrapped MP4 upload")
+            assert_prediction(app, "ZIP-wrapped MP4")
+            if not any("ZIP-wrapped video" in item.value for item in app.caption):
+                raise AssertionError("ZIP-wrapped video was not identified in UI")
+            if sentinel.exists():
+                raise AssertionError("Visitor ZIP was extracted to persistent shared cache")
+        finally:
+            if previous_cache is None:
+                os.environ.pop("HAR_VIDEO_CACHE", None)
+            else:
+                os.environ["HAR_VIDEO_CACHE"] = previous_cache
 
     print("Streamlit AppTest video-upload and prediction smoke passed.")
     print("This is local widget testing, not anonymous public-browser verification.")

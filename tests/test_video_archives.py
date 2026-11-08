@@ -32,18 +32,12 @@ def test_zip_disguised_as_mp4_gets_extracted(tmp_path):
     assert resolve_video_file(wrapped, cache_dir=tmp_path/'cached') == cached
     info = validate_video(wrapped, cache_dir=tmp_path/'cached')
     assert info['was_zip'] is True and info['width'] == 32
-    import os
-    previous = os.environ.get('HAR_VIDEO_CACHE')
-    os.environ['HAR_VIDEO_CACHE'] = str(tmp_path/'cached')
-    try:
-        frames = sample_video(wrapped, seq_length=20, image_size=64)
-        assert frames.shape == (20,64,64,3)
-        assert float(frames.min()) >= 0 and float(frames.max()) <= 1
-    finally:
-        if previous is None:
-            os.environ.pop('HAR_VIDEO_CACHE', None)
-        else:
-            os.environ['HAR_VIDEO_CACHE'] = previous
+    # Explicit request-owned extraction dir: no shared global upload cache.
+    frames = sample_video(wrapped, seq_length=20, image_size=64,
+                          cache_dir=tmp_path/'request_cache')
+    assert frames.shape == (20,64,64,3)
+    assert float(frames.min()) >= 0 and float(frames.max()) <= 1
+    assert len(list((tmp_path/'request_cache').glob('*.mp4'))) == 1
 
 
 def test_real_video_passes_through(tmp_path):

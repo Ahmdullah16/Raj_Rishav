@@ -278,7 +278,7 @@ elif page == 'Predict Activity':
                     import time
                     started_at=time.perf_counter()
                     info=validate_video(incoming,cache_dir=tmp/'cache')
-                    x=sample_video(incoming,seq_length=int(t),image_size=int(h))
+                    x=sample_video(incoming,seq_length=int(t),image_size=int(h),cache_dir=tmp/'cache')
                     prediction=np.asarray(model.predict(x[None,...],verbose=0)[0],dtype=float)
                     elapsed=time.perf_counter()-started_at
                     if not np.isfinite(prediction).all() or (prediction < 0).any() or not np.isclose(prediction.sum(),1.0,atol=0.01):

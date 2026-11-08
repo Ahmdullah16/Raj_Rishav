@@ -89,10 +89,11 @@ def validate_video(path: str | Path, cache_dir: str | Path | None = None) -> dic
         cap.release()
 
 
-def sample_video(path: str | Path, seq_length: int = 20, image_size: int = 64) -> np.ndarray:
-    """Return (T,H,W,3) normalized RGB frames, repeating if source is short."""
+def sample_video(path: str | Path, seq_length: int = 20, image_size: int = 64,
+                 cache_dir: str | Path | None = None) -> np.ndarray:
+    """Return normalized RGB frames; optionally isolate ZIP extraction per request."""
     import cv2
-    extracted = resolve_video_file(path)
+    extracted = resolve_video_file(path, cache_dir=cache_dir)
     cap = cv2.VideoCapture(str(extracted))
     try:
         if not cap.isOpened():
