@@ -3,6 +3,15 @@
 **Student project:** Raj Rishav · Department of Electronics and Electrical Engineering · IIT Guwahati  
 **GitHub:** https://github.com/Ahmdullah16/Raj_Rishav
 
+
+## Current public deployment and scientific status (November 8, 2026)
+
+- **Public app:** [rajrishav-har.streamlit.app](https://rajrishav-har.streamlit.app/) is verified by a **signed-out Chromium browser**. The [GitHub Actions public browser test](https://github.com/Ahmdullah16/Raj_Rishav/actions/runs/42491234697) uploaded a tiny generated MP4, obtained a CNN–LSTM predicted activity, and confirmed the completed results screen includes the CSV download control. This is functional evidence, **not** a recognition-accuracy test.
+- **Published model:** `artifacts/best_epoch9.keras` is a checksum-pinned, nine-epoch training snapshot; `artifacts/best.keras` is preserved as a rollback. It has 225,735 parameters and seven outputs for 20 RGB frames at 64 × 64 pixels. Uploaded ZIP-wrapped videos use per-request temporary extraction, cleaned after prediction.
+- **Training status:** The latest inspected source Drive checkpoint has nine saved epoch-equivalents of Adam optimizer state (108 updates), though the saved original Colab output lists eleven complete epoch reports and part of epoch twelve. Do **not** infer that the later two epochs' optimizer states were saved. The highest console-reported validation accuracy was 0.35 on 20 validation clips; **held-out test accuracy is not available**.
+- **Next scientific step:** Preserve authenticated Colab runtime or a newer valid backup if present, otherwise use the dedicated [safe resume notebook](https://colab.research.google.com/github/Ahmdullah16/Raj_Rishav/blob/main/notebooks/HAR_Resume_Colab.ipynb) with the existing Drive dataset. Select the best model using validation, then evaluate the frozen 20-video test set once and publish the actual confusion matrix/report. Do not redownload the dataset or retrain from zero.
+
+
 This repository implements a reproducible, end-to-end video action classifier using **TimeDistributed CNN** spatial features and an **LSTM** temporal model. It adapts the methodology in the supplied `ML_Lab_project.pdf` and earlier UCF101-based notebook to a **real seven-class Kaggle video subset** stored in Google Drive. It includes index/split creation, frame preprocessing, four model variants, memory-bounded training, evaluation, prediction, unit tests and a self-contained Colab notebook.
 
 [**Open complete project in Google Colab**](https://colab.research.google.com/github/Ahmdullah16/Raj_Rishav/blob/main/notebooks/HAR_CNN_LSTM_Complete.ipynb)
