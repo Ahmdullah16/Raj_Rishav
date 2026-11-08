@@ -81,3 +81,26 @@ verifies the upload-to-decoder-to-model-to-UI path on GitHub Actions runners.
 It is synthetic input, not a held-out test set or an external-browser test.
 The signed-in Streamlit developer must separately verify the deployed app
 from an incognito window using an authorized short real-world video.
+
+## Anonymous Chromium browser diagnostic (November 8 continuation)
+
+The separate GitHub Actions workflow `.github/workflows/public-browser-diagnostic.yml`
+launches a **fresh, signed-out Chromium browser** against the actual Community Cloud
+URL. If the prediction uploader becomes visible, it uploads a tiny generated
+MP4, presses **Analyze video and predict activity**, and checks for the
+predicted-activity message plus the CSV download control.
+
+Read the workflow's **har-anonymous-browser-diagnostic** artifact:
+`public_browser_diagnostic.json` and a screenshot. A `verified: true`
+result proves only this synthetic browser upload path on the deployed site,
+**not** scientific recognition accuracy or recognition of a real person.
+An authentication interstitial, sleeping app, or timeout is reported
+without guessing whether Streamlit sharing is private or whether inference code
+is faulty. The diagnostic intentionally does not fail source CI on an external
+service condition. It does not collect credentials or the Kaggle dataset.
+
+If the browser probe cannot render the prediction page, inspect **Settings →
+Sharing** in the signed-in Streamlit workspace, verify the deployed entrypoint
+and recent revision, and review Community Cloud logs. Account sharing is not
+controllable from the GitHub repository. After synthetic browser success,
+repeat a permitted real-video upload manually as the final public-site check.
